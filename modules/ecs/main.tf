@@ -130,7 +130,7 @@ resource "aws_ecs_task_definition" "foo" {
 
   container_definitions = jsonencode([
     {
-      name  = "my-app"
+      name  = "nyu-vip-container"
       image = "${var.aws_account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.project_name}:latest"
       portMappings = [
         {
@@ -157,10 +157,10 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [var.alb_security_group_id] // Allow incoming HTTP traffic from ALB only 
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [var.alb_security_group_id] // Allow incoming HTTP traffic from ALB only 
   }
 
   egress {
@@ -184,9 +184,9 @@ resource "aws_ecs_service" "foo" {
     security_groups = [aws_security_group.ecs_sg.id]
   }
 
-  # load_balancer {
-  #   target_group_arn = var.target_group_arn
-  #   container_name   = "test-container"
-  #   container_port   = 3000
-  # }
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "nyu-vip-container"
+    container_port   = 3000 # with dynamic port mapping, we don't need to specify the port here 
+  }
 }
