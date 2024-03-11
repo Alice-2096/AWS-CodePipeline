@@ -184,9 +184,9 @@ resource "aws_ecs_service" "foo" {
     security_groups = [aws_security_group.ecs_sg.id]
   }
 
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = "test-container"
-    container_port   = 3000
-  }
+  # load_balancer {
+  #   target_group_arn = var.target_group_arn
+  #   container_name   = "test-container"
+  #   container_port   = 3000
+  # }
 }

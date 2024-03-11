@@ -1,11 +1,4 @@
 
-module "acm_alb" {
-  source      = "terraform-aws-modules/acm/aws"
-  version     = "~> v2.0"
-  domain_name = var.public_alb_domain
-  zone_id     = data.aws_route53_zone.this.zone_id
-}
-
 resource "aws_security_group" "alb" {
   name        = "nyu-alb"
   description = "Allow HTTPS inbound traffc"
@@ -17,14 +10,6 @@ resource "aws_security_group" "alb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   ingress {
     from_port   = 80
     to_port     = 80
@@ -40,32 +25,41 @@ resource "aws_security_group" "alb" {
   }
 }
 
-
-module "alb" {
-  source             = "terraform-aws-modules/alb/aws"
-  version            = "~> 5.0"
-  name               = "$nyu-vip-alb"
+resource "aws_alb" "application_load_balancer" {
+  name               = "nyu-vip-alb"
+  internal           = false
   load_balancer_type = "application"
-  vpc_id             = var.vpc_id
   subnets            = var.public_subnets
   security_groups    = [aws_security_group.alb.id]
+}
 
-  https_listeners = [
-    {
-      "certificate_arn" = module.acm_alb.this_acm_certificate_arn
-      "port"            = 443
-    },
-    {
-      "certificate_arn" = module.acm_alb.this_acm_certificate_arn
-      "port"            = 80
-    },
-  ]
+resource "aws_lb_target_group" "target_group" {
+  name        = "nyu-vip-tg"
+  port        = 3000 # container port 
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
 
-  target_groups = [
-    {
-      name             = "nyu-default-tg"
-      backend_protocol = "HTTP"
-      backend_port     = 80
-    }
-  ]
+  # health_check {
+  #   path                = "/health"
+  #   protocol            = "HTTP"
+  #   matcher             = "200"
+  #   port                = "traffic-port"
+  #   healthy_threshold   = 2
+  #   unhealthy_threshold = 2
+  #   timeout             = 10
+  #   interval            = 30
+  # }
+}
+
+#Defines an HTTP Listener for the ALB
+resource "aws_lb_listener" "listener" {
+  load_balancer_arn = aws_alb.application_load_balancer.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target_group.arn
+  }
 }
