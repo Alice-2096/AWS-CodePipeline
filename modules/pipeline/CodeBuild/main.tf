@@ -1,5 +1,23 @@
-resource "aws_codebuild_project" "terraform_codebuild_project" {
-  name           = var.project_name
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+data "aws_partition" "current" {}
+
+resource "aws_iam_role" "codebuild_role" {
+  name = "codebuild-service-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "codebuild.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_codebuild_project" "nyu_vip_codebuild_project" {
+  name           = "${var.project_name}-codebuild"
   service_role   = var.role_arn
   encryption_key = var.kms_key_arn
   tags = {
@@ -34,95 +52,37 @@ resource "aws_codebuild_project" "terraform_codebuild_project" {
   }
 }
 
+//////////////// IAM policy for codebuild ///////////////////////
 
-# resource "aws_iam_role" "codebuild_role" {
-#   name               = "awsecsdemo_springboot_codebuild_role-${var.image_repo_name}"
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Service": "codebuild.amazonaws.com"
-#       },
-#       "Effect": "Allow",
-#       "Sid": "TrustPolicyStatementThatAllowsEC2ServiceToAssumeTheAttachedRole"
-#     }
-#   ]
+
+# data "aws_iam_policy_document" "codebuild_policy" {
+#   statement {
+#     sid = "ECSBuildAndPushPolicy"
+
+#     actions = [
+#       "ecr:GetAuthorizationToken",
+#       "ecr:BatchCheckLayerAvailability",
+#       "ecr:GetDownloadUrlForLayer",
+#       "ecr:BatchGetImage",
+#       "ecr:InitiateLayerUpload",
+#       "ecr:UploadLayerPart",
+#       "ecr:CompleteLayerUpload",
+#       "ecr:PutImage"
+#     ]
+
+#     resources = [
+#       "*"
+#     ]
+#   }
 # }
-# EOF
+
+# resource "aws_iam_policy" "codebuild_policy" {
+#   name        = "CodeBuildECSAndECRPolicy"
+#   description = "Policy to allow CodeBuild to build image on ECS and push to ECR"
+#   policy      = data.aws_iam_policy_document.codebuild_policy.json
 # }
-# resource "aws_iam_role_policy" "codebuild_policy" {
-#   name   = "awsecsdemo_springboot_codebuild_policy-${var.image_repo_name}"
-#   role   = aws_iam_role.codebuild_role.id
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "logs:CreateLogGroup",
-#         "logs:CreateLogStream",
-#         "logs:PutLogEvents"
-#       ],
-#       "Resource": "arn:aws:logs:*:*:*",
-#       "Effect": "Allow"
-#     },
-#     {
-#       "Action": [
-#         "s3:GetObject",
-#         "s3:GetObjectVersion",
-#         "s3:GetBucketVersioning",
-#         "s3:PutObjectVersionTagging",
-#         "s3:PutObjectLegalHold",
-#         "s3:GetBucketVersioning",
-#         "s3:PutObject",
-#         "s3:PutObjectRetention",
-#         "s3:PutObjectVersionAcl",
-#         "s3:PutObjectTagging",
-#         "s3:PutObjectAcl"
-#       ],
-#       "Resource": [
-#         "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket.bucket}",
-#         "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket.bucket}/*"
-#       ],
-#       "Effect": "Allow"
-#     },
-#     {
-#       "Action": [
-#         "ecr:BatchCheckLayerAvailability",
-#         "ecr:CompleteLayerUpload",
-#         "ecr:GetAuthorizationToken",
-#         "ecr:InitiateLayerUpload",
-#         "ecr:PutImage",
-#         "ecr:UploadLayerPart"
-#       ],
-#       "Resource": [
-#         "*"
-#       ],
-#         "Effect": "Allow"
-#     },
-#     {
-#       "Action": [
-#         "ecs:UpdateService",
-#         "ecs:ListTaskDefinitions",
-#         "ecs:DescribeTaskDefinition",
-#         "ecs:RegisterTaskDefinition",
-#         "ecs:DeregisterTaskDefinition",
-#         "ecs:DescribeServices",
-#         "ecs:DescribeClusters",
-#         "ecs:ListClusters",
-#         "ecs:ListServices",
-#         "iam:GetRole",
-#         "iam:PassRole"
-#       ],
-#       "Resource": [
-#         "*"
-#       ],
-#         "Effect": "Allow"
-#     }
-#   ]
-# }
-# EOF
+
+# resource "aws_iam_role_policy_attachment" "codebuild_policy_attachment" {
+#   role       = aws_iam_role.codebuild_role.name
+#   policy_arn = aws_iam_policy.codebuild_policy.arn
 # }

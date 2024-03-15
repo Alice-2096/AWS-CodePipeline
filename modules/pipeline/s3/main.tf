@@ -1,8 +1,11 @@
 
-#Artifact bucket 
+# artifact bucket 
 resource "aws_s3_bucket" "codepipeline_bucket" {
   bucket        = "${var.project_name}-codepipeline-bucket"
   force_destroy = true
+  tags = {
+    Name        = "${var.project_name}-codepipeline-bucket"
+  }
 }
 
 # access control
@@ -13,6 +16,7 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_access" {
   block_public_acls       = true
   block_public_policy     = true
 }
+
 resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
   acl    = "private"
@@ -35,35 +39,4 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_buck
       sse_algorithm     = "aws:kms"
     }
   }
-}
-
-# IAM roles and policies 
-data "aws_iam_policy_document" "bucket_policy_doc_codepipeline_bucket" {
-  statement {
-    principals {
-      type        = "AWS"
-      identifiers = [var.codepipeline_role_arn]
-    }
-
-    actions = [
-      "s3:Get*",
-      "s3:List*",
-      "s3:ReplicateObject",
-      "s3:PutObject",
-      "s3:RestoreObject",
-      "s3:PutObjectVersionTagging",
-      "s3:PutObjectTagging",
-      "s3:PutObjectAcl"
-    ]
-
-    resources = [
-      aws_s3_bucket.codepipeline_bucket.arn,
-      "${aws_s3_bucket.codepipeline_bucket.arn}/*",
-    ]
-  }
-}
-
-resource "aws_s3_bucket_policy" "bucket_policy_codepipeline_bucket" {
-  bucket = aws_s3_bucket.codepipeline_bucket.id
-  policy = data.aws_iam_policy_document.bucket_policy_doc_codepipeline_bucket.json
 }

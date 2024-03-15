@@ -7,3 +7,4 @@ locals {
   region       = data.aws_region.current.name
   project_name = "nyu-vip"
 }
+

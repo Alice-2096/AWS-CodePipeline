@@ -1,13 +1,7 @@
 
-# connection to GitHub 
-resource "aws_codestarconnections_connection" "nyu-vip-connection" {
-  name          = "${var.project_name}-connection"
-  provider_type = "GitHub"
-}
-
 resource "aws_codepipeline" "codepipeline" {
   name     = "${var.project_name}-pipeline"
-  role_arn = aws_iam_role.codepipeline_role.arn
+  role_arn = var.role_arn
 
   artifact_store {
     location = var.s3_bucket_name
@@ -30,7 +24,7 @@ resource "aws_codepipeline" "codepipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.nyu-vip-connection.arn
+        ConnectionArn    = var.connection_arn
         FullRepositoryId = "${var.github_repo_owner}/${var.github_repo_name}"
         BranchName       = var.github_branch
       }
