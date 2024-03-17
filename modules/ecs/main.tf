@@ -129,7 +129,7 @@ resource "aws_ecs_task_definition" "nyu-al-ecs-task-definition" {
 
   container_definitions = jsonencode([
     {
-      name  = "nyu-vip-container"
+      name  = var.container_name
       image = "${var.repo_url}/${var.ecr_repo_name}:latest"
       portMappings = [
         {
@@ -183,9 +183,13 @@ resource "aws_ecs_service" "nyu-al-ecs-service" {
     security_groups = [aws_security_group.ecs_sg.id]
   }
 
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = "nyu-vip-container"
-    container_port   = 3000 # with dynamic port mapping, we don't need to specify the port here 
+  # load_balancer { 
+  #   target_group_arn = var.target_group_arn[0]
+  #   container_name   = "nyu-vip-container"
+  #   container_port   = 3000 # with dynamic port mapping, we don't need to specify the port here 
+  # }
+
+  deployment_controller {
+    type = "CODE_DEPLOY" # Use CodeDeploy to manage deployments
   }
 }

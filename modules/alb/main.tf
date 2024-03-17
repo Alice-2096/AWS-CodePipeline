@@ -34,32 +34,33 @@ resource "aws_alb" "application_load_balancer" {
 }
 
 resource "aws_lb_target_group" "target_group" {
-  name        = "nyu-vip-tg"
+  count = 2 # used for blue-green deployment
+  name  = "nyu-vip-target-group-${count.index}"
+
+
   port        = 3000 # container port 
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = var.vpc_id
 
-  # health_check {
-  #   path                = "/health"
-  #   protocol            = "HTTP"
-  #   matcher             = "200"
-  #   port                = "traffic-port"
-  #   healthy_threshold   = 2
-  #   unhealthy_threshold = 2
-  #   timeout             = 10
-  #   interval            = 30
-  # }
+  health_check {
+    path     = "/"
+    protocol = "HTTP"
+    port     = "3000"
+    interval = 300
+  }
 }
 
 #Defines an HTTP Listener for the ALB
 resource "aws_lb_listener" "listener" {
+  depends_on        = [aws_lb_target_group.target_group]
+  count             = 2
   load_balancer_arn = aws_alb.application_load_balancer.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.target_group.arn
+    target_group_arn = aws_lb_target_group.target_group[count.index].arn
   }
 }

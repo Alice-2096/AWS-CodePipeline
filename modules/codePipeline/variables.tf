@@ -22,3 +22,8 @@ variable "connection_arn" {
 variable "cluster_name" {}
 variable "service_name" {}
 
+variable "codedeploy_app_name" {
+}
+variable "codedeploy_deployment_group_name" {
+
+}

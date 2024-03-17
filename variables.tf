@@ -31,7 +31,6 @@ variable "environment" {
 variable "ecr_repo_url" {
   description = "URL of the ECR repository"
   type        = string
-  default     = "713215096865.dkr.ecr.us-east-1.amazonaws.com/nyu-vip"
 }
 
 variable "ecr_repo_name" {

@@ -77,22 +77,36 @@ module "ecs" {
   repo_url              = var.ecr_repo_url
   project_name          = local.project_name
   aws_region            = var.aws_region
+  container_name        = var.container_name
+}
+
+module "codedeploy" {
+  source                = "./modules/codedeploy"
+  depends_on            = [module.ecs]
+  project_name          = local.project_name
+  role_arn              = module.IAM.iam_role_arn
+  ecs_service_name      = module.ecs.ecs_service_name
+  ecs_cluster_name      = module.ecs.ecs_cluster_name
+  aws_lb_listener_arn   = module.alb.listener_arn
+  alb_target_group_name = module.alb.target_group_name
 }
 
 ////////////////////////// CodePipeline ////////////////////////// 
 
 module "codepipeline" {
-  depends_on = [module.codebuild, module.s3, module.IAM]
+  depends_on = [module.codebuild, module.s3, module.IAM, module.codedeploy]
   source     = "./modules/CodePipeline"
 
-  project_name      = local.project_name
-  github_branch     = var.github_branch
-  github_repo_name  = var.github_repo_name
-  github_repo_owner = var.github_repo_owner
-  s3_bucket_name    = module.s3.s3_bucket_name
-  kms_key_arn       = module.kms.kms_key_arn
-  role_arn          = module.IAM.iam_role_arn
-  connection_arn    = aws_codestarconnections_connection.nyu-vip-connection.arn
-  cluster_name      = module.ecs.ecs_cluster_name
-  service_name      = module.ecs.ecs_service_name
+  project_name                     = local.project_name
+  github_branch                    = var.github_branch
+  github_repo_name                 = var.github_repo_name
+  github_repo_owner                = var.github_repo_owner
+  s3_bucket_name                   = module.s3.s3_bucket_name
+  kms_key_arn                      = module.kms.kms_key_arn
+  role_arn                         = module.IAM.iam_role_arn
+  connection_arn                   = aws_codestarconnections_connection.nyu-vip-connection.arn
+  cluster_name                     = module.ecs.ecs_cluster_name
+  service_name                     = module.ecs.ecs_service_name
+  codedeploy_app_name              = module.codedeploy.codedeploy_app_name
+  codedeploy_deployment_group_name = module.codedeploy.codedeploy_deployment_group_name
 }

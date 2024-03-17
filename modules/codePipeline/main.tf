@@ -57,10 +57,11 @@ resource "aws_codepipeline" "codepipeline" {
       input_artifacts = ["build_output"]
       version         = "1"
       configuration = {
-        ClusterName        = var.cluster_name
-        ServiceName        = var.service_name
-        FileName           = "imagedefinitions.json"
-        Image1ArtifactName = "build_output"
+        ApplicationName                = var.codedeploy_app_name
+        DeploymentGroupName            = var.codedeploy_deployment_group_name
+        FileName                       = "imagedefinitions.json"
+        TaskDefinitionTemplateArtifact = "build_output"
+        AppSpecTemplateArtifact        = "build_output"
       }
     }
   }
