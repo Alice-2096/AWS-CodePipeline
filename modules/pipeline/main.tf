@@ -20,11 +20,12 @@ module "s3" {
   kms_key_arn  = module.kms.kms_key_arn
 }
 
-# connection to GitHub 
+# connection to GitHub -- NOTE : This is a manual step. You need to create a connection to GitHub in the AWS console
 resource "aws_codestarconnections_connection" "nyu-vip-connection" {
-  name          = "${local.project_name}-connection"
+  name          = "${local.project_name}-github-connection"
   provider_type = "GitHub"
 }
+
 
 module "IAM" {
   depends_on                 = [module.s3, module.kms]
@@ -47,7 +48,7 @@ module "codebuild" {
   role_arn                            = module.IAM.iam_role_arn
   builder_compute_type                = "BUILD_GENERAL1_SMALL"
   builder_type                        = "LINUX_CONTAINER"
-  builder_image                       = "aws/codebuild/nodejs:14.0"
+  builder_image                       = "aws/codebuild/standard:4.0"
   builder_image_pull_credentials_type = "CODEBUILD"
 }
 

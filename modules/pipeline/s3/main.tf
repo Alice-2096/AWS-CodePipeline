@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "codepipeline_bucket" {
   bucket        = "${var.project_name}-codepipeline-bucket"
   force_destroy = true
   tags = {
-    Name        = "${var.project_name}-codepipeline-bucket"
+    Name = "${var.project_name}-codepipeline-bucket"
   }
 }
 
@@ -17,10 +17,6 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_access" {
   block_public_policy     = true
 }
 
-resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
-  bucket = aws_s3_bucket.codepipeline_bucket.id
-  acl    = "private"
-}
 
 # enable versioning and encryption 
 resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
