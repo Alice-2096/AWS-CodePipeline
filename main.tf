@@ -94,19 +94,19 @@ module "codedeploy" {
 ////////////////////////// CodePipeline ////////////////////////// 
 
 module "codepipeline" {
-  depends_on = [module.codebuild, module.s3, module.IAM, module.codedeploy]
+  depends_on = [module.codebuild, module.s3, module.IAM, module.codedeploy, module.ecs]
   source     = "./modules/CodePipeline"
 
-  project_name                     = local.project_name
-  github_branch                    = var.github_branch
-  github_repo_name                 = var.github_repo_name
-  github_repo_owner                = var.github_repo_owner
-  s3_bucket_name                   = module.s3.s3_bucket_name
-  kms_key_arn                      = module.kms.kms_key_arn
-  role_arn                         = module.IAM.iam_role_arn
-  connection_arn                   = aws_codestarconnections_connection.nyu-vip-connection.arn
-  cluster_name                     = module.ecs.ecs_cluster_name
-  service_name                     = module.ecs.ecs_service_name
-  codedeploy_app_name              = module.codedeploy.codedeploy_app_name
-  codedeploy_deployment_group_name = module.codedeploy.codedeploy_deployment_group_name
+  project_name      = local.project_name
+  github_branch     = var.github_branch
+  github_repo_name  = var.github_repo_name
+  github_repo_owner = var.github_repo_owner
+  s3_bucket_name    = module.s3.s3_bucket_name
+  kms_key_arn       = module.kms.kms_key_arn
+  role_arn          = module.IAM.iam_role_arn
+  connection_arn    = aws_codestarconnections_connection.nyu-vip-connection.arn
+  cluster_name      = module.ecs.ecs_cluster_name
+  service_name      = module.ecs.ecs_service_name
+  # codedeploy_app_name              = module.codedeploy.codedeploy_app_name
+  # codedeploy_deployment_group_name = module.codedeploy.codedeploy_deployment_group_name
 }

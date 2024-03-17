@@ -54,13 +54,13 @@ resource "aws_lb_target_group" "target_group" {
 #Defines an HTTP Listener for the ALB
 resource "aws_lb_listener" "listener" {
   depends_on        = [aws_lb_target_group.target_group]
-  count             = 2
   load_balancer_arn = aws_alb.application_load_balancer.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.target_group[count.index].arn
+    target_group_arn = aws_lb_target_group.target_group[0].arn
   }
 }
+

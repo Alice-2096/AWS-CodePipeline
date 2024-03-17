@@ -64,7 +64,8 @@ resource "aws_iam_policy" "ec2-role" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:CreateLogGroup"
         ],
         "Resource" : "*"
       },
@@ -183,13 +184,9 @@ resource "aws_ecs_service" "nyu-al-ecs-service" {
     security_groups = [aws_security_group.ecs_sg.id]
   }
 
-  # load_balancer { 
-  #   target_group_arn = var.target_group_arn[0]
-  #   container_name   = "nyu-vip-container"
-  #   container_port   = 3000 # with dynamic port mapping, we don't need to specify the port here 
-  # }
-
-  deployment_controller {
-    type = "CODE_DEPLOY" # Use CodeDeploy to manage deployments
+  load_balancer {
+    target_group_arn = var.target_group_arn[0]
+    container_name   = "nyu-vip-container"
+    container_port   = 3000 # with dynamic port mapping, we don't need to specify the port here 
   }
 }
