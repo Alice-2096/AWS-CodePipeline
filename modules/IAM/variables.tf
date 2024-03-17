@@ -1,6 +1,3 @@
-variable "create_new_role" {
-  default = false
-}
 variable "codepipeline_iam_role_name" {
   description = "ARN of the codepipeline IAM role"
   type        = string

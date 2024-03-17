@@ -19,3 +19,6 @@ variable "connection_arn" {
   type        = string
 }
 
+variable "cluster_name" {}
+variable "service_name" {}
+

@@ -45,8 +45,8 @@ resource "aws_codebuild_project" "nyu_vip_codebuild_project" {
       value = "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_repo_url}"
     }
     environment_variable {
-      name = "CONTAINER_NAME"
-      value = "${var.container_name}"
+      name  = "CONTAINER_NAME"
+      value = var.container_name
     }
   }
 

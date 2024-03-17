@@ -23,9 +23,7 @@ variable "ecr_repo_url" {}
 variable "ecr_repo_name" {
 
 }
-variable "aws_region" {
-
-}
+variable "aws_region" {}
 
 variable "container_name" {
 

@@ -1,7 +1,6 @@
 
-resource "aws_ecs_cluster" "foo" {
-  name = "my-cluster"
-
+resource "aws_ecs_cluster" "nyu-al-ecs-cluster" {
+  name = "${var.project_name}-cluster"
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
@@ -120,8 +119,8 @@ resource "aws_iam_role_policy_attachment" "secret_manager_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
 }
 
-resource "aws_ecs_task_definition" "foo" {
-  family                   = "my-app"
+resource "aws_ecs_task_definition" "nyu-al-ecs-task-definition" {
+  family                   = "${var.project_name}-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -131,7 +130,7 @@ resource "aws_ecs_task_definition" "foo" {
   container_definitions = jsonencode([
     {
       name  = "nyu-vip-container"
-      image = "${var.aws_account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.project_name}:latest"
+      image = "${var.repo_url}/${var.ecr_repo_name}:latest"
       portMappings = [
         {
           containerPort = 3000
@@ -141,10 +140,10 @@ resource "aws_ecs_task_definition" "foo" {
       logConfiguration = {
         "logDriver" : "awslogs",
         "options" : {
-          "awslogs-group" : "nyu-vip-container",
-          "awslogs-region" : "us-east-1",
+          "awslogs-group" : "/ecs/${var.project_name}",
+          "awslogs-region" : "${var.aws_region}",
           "awslogs-create-group" : "true",
-          "awslogs-stream-prefix" : "nyu-vip"
+          "awslogs-stream-prefix" : "${var.project_name}-ecs"
         }
       }
     }
@@ -171,10 +170,10 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-resource "aws_ecs_service" "foo" {
+resource "aws_ecs_service" "nyu-al-ecs-service" {
   name            = "ecs-service"
-  cluster         = aws_ecs_cluster.foo.id
-  task_definition = aws_ecs_task_definition.foo.arn
+  cluster         = aws_ecs_cluster.nyu-al-ecs-cluster.id
+  task_definition = aws_ecs_task_definition.nyu-al-ecs-task-definition.arn
   desired_count   = 1
   depends_on      = [aws_iam_role.ecs_task_execution_role]
   launch_type     = "FARGATE"
