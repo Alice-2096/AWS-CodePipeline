@@ -50,6 +50,10 @@ module "codebuild" {
   builder_type                        = "LINUX_CONTAINER"
   builder_image                       = "aws/codebuild/standard:4.0"
   builder_image_pull_credentials_type = "CODEBUILD"
+  ecr_repo_url                        = var.ecr_repo_url
+  ecr_repo_name                       = var.ecr_repo_name
+  aws_region                          = var.aws_region
+  container_name                      = var.container_name
 }
 
 module "codepipeline" {

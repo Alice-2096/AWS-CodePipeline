@@ -19,3 +19,14 @@ variable "builder_type" {
 variable "builder_image_pull_credentials_type" {
 
 }
+variable "ecr_repo_url" {}
+variable "ecr_repo_name" {
+
+}
+variable "aws_region" {
+
+}
+
+variable "container_name" {
+
+}

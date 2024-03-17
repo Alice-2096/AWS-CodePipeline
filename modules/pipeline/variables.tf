@@ -13,3 +13,13 @@ variable "codepipeline_iam_role_name" {
 variable "environment" {
   default = "dev"
 }
+
+variable "ecr_repo_url" {}
+
+variable "ecr_repo_name" {
+
+}
+variable "container_name" {
+
+}
+

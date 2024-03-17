@@ -37,15 +37,25 @@ resource "aws_codebuild_project" "nyu_vip_codebuild_project" {
     image_pull_credentials_type = var.builder_image_pull_credentials_type
 
     environment_variable {
-      name  = "AWS_ACCOUNT_ID"
-      value = data.aws_caller_identity.current.account_id
+      name  = "REPO_URL"
+      value = "${var.ecr_repo_url}/${var.ecr_repo_name}"
+    }
+    environment_variable {
+      name  = "PUSH_TO_ECR_COMMAND"
+      value = "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_repo_url}"
+    }
+    environment_variable {
+      name = "CONTAINER_NAME"
+      value = "${var.container_name}"
     }
   }
+
   logs_config {
     cloudwatch_logs {
       status = "ENABLED"
     }
   }
+
   source {
     type      = var.build_project_source
     buildspec = "buildspec.yml"

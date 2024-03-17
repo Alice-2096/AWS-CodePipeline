@@ -18,3 +18,4 @@ variable "connection_arn" {
   description = "ARN of the CodeStar connection"
   type        = string
 }
+
