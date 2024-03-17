@@ -3,4 +3,8 @@
 # Ignore the .terraform directory
 .terraform/
 
+*.tfstate.*
+.terraform/
 terraform.* 
+*.tfplan 
+*.tfvars
